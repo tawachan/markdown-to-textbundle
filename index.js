@@ -5,17 +5,6 @@ const OUTPUTS_PATH = "./outputs";
 const INPUTS_PATH = "./inputs";
 const TEMPLATES_PATH = "./templates";
 
-const ENV = {
-  notion: process.env.NOTION === "1",
-};
-
-export const removeUniqueIdFromFileName = (fileName) => {
-  // Notionは "〈物語〉シリーズ セカンドシーズン b537c73e8449496e9d4bbd7c8c570922" のように最後にIDが付いた名称になるのでこれを取り除く
-  const fileNameArray = fileName.split(" ");
-  fileNameArray.pop();
-  return fileNameArray.join(" ");
-};
-
 const main = async () => {
   if (fs.existsSync(OUTPUTS_PATH)) {
     fs.rmSync(OUTPUTS_PATH, { force: true, recursive: true });
@@ -33,13 +22,10 @@ const main = async () => {
       ...text.matchAll(/!\[(.+?\.(jpg|png|jpeg))\]\(.+?\.(png|jpeg|jpg)\)/g),
     ].map((r) => r[1]);
 
-    let modifiedFileName = fileName.replace(".md", "");
-    if (ENV.notion) {
-      modifiedFileName = removeUniqueIdFromFileName(modifiedFileName);
-    }
-
-    const outputFolderPath = path.join(OUTPUTS_PATH, modifiedFileName);
-
+    const outputFolderPath = path.join(
+      OUTPUTS_PATH,
+      fileName.replace(".md", "")
+    );
     fs.mkdirSync(outputFolderPath);
 
     const inputInfoFilePath = path.join(TEMPLATES_PATH, "info.json");
@@ -51,13 +37,8 @@ const main = async () => {
 
     if (assetLinks.length > 0) {
       assetLinks.forEach((link) => {
-        const decodedLink = decodeURIComponent(link);
-        const inputAssetPath = path.join(INPUTS_PATH, decodedLink);
-        const outputAssetPath = path.join(outputFolderPath, decodedLink);
-        const parsed = path.parse(outputAssetPath);
-        if (!fs.existsSync(parsed.dir)) {
-          fs.mkdirSync(parsed.dir, { recursive: true });
-        }
+        const inputAssetPath = path.join(INPUTS_PATH, link);
+        const outputAssetPath = path.join(outputFolderPath, link);
         fs.copyFileSync(inputAssetPath, outputAssetPath);
       });
     }

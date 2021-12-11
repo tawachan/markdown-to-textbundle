@@ -2,8 +2,5 @@
   "type": "module",
   "devDependencies": {
     "prettier": "^2.5.1"
-  },
-  "scripts": {
-    "start": "node src/index.js"
   }
 }
