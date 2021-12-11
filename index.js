@@ -26,6 +26,7 @@ const main = async () => {
       OUTPUTS_PATH,
       fileName.replace(".md", "")
     );
+
     fs.mkdirSync(outputFolderPath);
 
     const inputInfoFilePath = path.join(TEMPLATES_PATH, "info.json");
@@ -37,8 +38,13 @@ const main = async () => {
 
     if (assetLinks.length > 0) {
       assetLinks.forEach((link) => {
-        const inputAssetPath = path.join(INPUTS_PATH, link);
-        const outputAssetPath = path.join(outputFolderPath, link);
+        const decodedLink = decodeURIComponent(link);
+        const inputAssetPath = path.join(INPUTS_PATH, decodedLink);
+        const outputAssetPath = path.join(outputFolderPath, decodedLink);
+        const parsed = path.parse(outputAssetPath);
+        if (!fs.existsSync(parsed.dir)) {
+          fs.mkdirSync(parsed.dir, { recursive: true });
+        }
         fs.copyFileSync(inputAssetPath, outputAssetPath);
       });
     }
