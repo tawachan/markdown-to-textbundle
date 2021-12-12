@@ -30,7 +30,9 @@ const main = async () => {
     const text = fs.readFileSync(filePath).toString();
 
     const assetLinks = [
-      ...text.matchAll(/!\[(.+?\.(jpg|png|jpeg))\]\(.+?\.(png|jpeg|jpg)\)/g),
+      ...text.matchAll(
+        /!\[(.+?\.(jpg|png|jpeg|pdf))\]\(.+?\.(png|jpeg|jpg|pdf)\)/g
+      ),
     ].map((r) => r[1]);
 
     let modifiedFileName = fileName.replace(".md", "");
@@ -49,18 +51,16 @@ const main = async () => {
     const outPutMarkdownFilePath = path.join(outputFolderPath, fileName);
     fs.copyFileSync(filePath, outPutMarkdownFilePath);
 
-    if (assetLinks.length > 0) {
-      assetLinks.forEach((link) => {
-        const decodedLink = decodeURIComponent(link);
-        const inputAssetPath = path.join(INPUTS_PATH, decodedLink);
-        const outputAssetPath = path.join(outputFolderPath, decodedLink);
-        const parsed = path.parse(outputAssetPath);
-        if (!fs.existsSync(parsed.dir)) {
-          fs.mkdirSync(parsed.dir, { recursive: true });
-        }
-        fs.copyFileSync(inputAssetPath, outputAssetPath);
-      });
-    }
+    assetLinks.forEach((link) => {
+      const decodedLink = decodeURIComponent(link);
+      const inputAssetPath = path.join(INPUTS_PATH, decodedLink);
+      const outputAssetPath = path.join(outputFolderPath, decodedLink);
+      const parsed = path.parse(outputAssetPath);
+      if (!fs.existsSync(parsed.dir)) {
+        fs.mkdirSync(parsed.dir, { recursive: true });
+      }
+      fs.copyFileSync(inputAssetPath, outputAssetPath);
+    });
   });
 };
 
